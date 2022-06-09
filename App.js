@@ -6,145 +6,75 @@
  * @flow strict-local
  */
 
-import React from 'react';
-import Realm from "realm";
-import TaskSchema from './Schemas/TaskSchema.js'
+import React, {useState} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
-  Text,
   useColorScheme,
-  View,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import "react-native-gesture-handler";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { AuthProvider } from './providers/AuthProvider.js';
+import { TasksProvider } from './providers/TasksProvider.js';
 
-const Section = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+import { WelcomeView } from "./views/WelcomeView";
+import { ProjectsView } from "./views/ProjectsView";
+import { TasksView } from "./views/TasksView";
 
-(async () => {
-  const realm = await Realm.open({
-    path: "myrealm",
-    schema: [TaskSchema]
-  });
-
-  // Add a couple of Tasks in a single, atomic transaction WRITE
-  // let task1, task2;
-  // realm.write(() => {
-  //   task1 = realm.create("Task", {
-  //     _id: 1,
-  //     name: "go grocery shopping",
-  //     status: "Open",
-  //   });
-  //   task2 = realm.create("Task", {
-  //     _id: 2,
-  //     name: "go exercise",
-  //     status: "Open",
-  //   });
-  //   console.log(`created two tasks: ${task1.name} & ${task2.name}`);
-  // });
-  // use task1 and task2
-
-  // READ
-  // const tasks = realm.objects("Task");
-  // console.log(`The lists of tasks are: ${tasks.map((task)  => task.name)}`);
-
-  //FILTER
-  const filtered = realm.objects("Task").filtered("status = 'Open'");
-  console.log(`The lists of open tasks are: ${filtered.map(
-    (filtered) => filtered.name
-  )}`)
-})();
+import { Logout } from "./components/Logout";
 
 
-
+const Stack = createStackNavigator();
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
+  
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <AuthProvider>
+      <NavigationContainer>
+      <Stack.Navigator>
+          <Stack.Screen
+            name="Welcome View"
+            component={WelcomeView}
+            options={{ title: "Task Tracker" }}
+          />
+          <Stack.Screen
+            name="Projects"
+            component={ProjectsView}
+            title="ProjectsView"
+            headerBackTitle="log out"
+            options={{
+              headerLeft: function Header() {
+                return <Logout />;
+              },
+            }}
+          />
+          <Stack.Screen name="Task List">
+            {(props) => {
+              const { navigation, route } = props;
+              const { user, projectPartition } = route.params;
+              return (
+                <TasksProvider user={user} projectPartition={projectPartition}>
+                  <TasksView navigation={navigation} route={route} />
+                </TasksProvider>
+              );
+            }}
+          </Stack.Screen>
+        </Stack.Navigator>
+        </NavigationContainer>
+    </AuthProvider>
   );
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    width: 300
   },
 });
+
 
 export default App;
