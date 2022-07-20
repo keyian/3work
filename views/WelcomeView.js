@@ -11,7 +11,7 @@ export function WelcomeView({ navigation }) {
   useEffect(() => {
     // If there is a user logged in, go to the Projects page.
     if (user != null) {
-      navigation.navigate("Projects");
+      navigation.navigate("Threes");
     }
   }, [user]);
 

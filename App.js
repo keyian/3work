@@ -39,7 +39,7 @@ const App = () => {
             options={{ title: "Task Tracker" }}
           />
           <Stack.Screen
-            name="Projects"
+            name="Threes"
             component={ProjectsView}
             title="ProjectsView"
             headerBackTitle="log out"
